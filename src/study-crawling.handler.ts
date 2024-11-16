@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { APIGatewayProxyResult, SQSEvent } from 'aws-lambda';
 import { studyCrawlerFactory } from './crawler/study-crawler-factory';
 
@@ -15,10 +16,28 @@ export async function studyCrawler(event: SQSEvent): Promise<APIGatewayProxyResu
     const crawler = crawlerFactory('INFLEARN');
 
     const studyList = await crawler.getStudyList();
+    //TODO filtering already sended
   }
 
   return {
     statusCode: 200,
-    body: studyList.join(''),
+    body: '',
+  };
+}
+
+export function getEnv() {
+  const envReader = loadFromEnvMandatory(process.env);
+  return {
+    slackWebhookUrl: envReader('SLACK_WEBHOOK_URL'),
+  };
+}
+
+function loadFromEnvMandatory(source: Record<string, string | undefined>) {
+  return (key: string) => {
+    const found = source[key];
+    if (!found) {
+      throw new Error(`the env-variable: ${key} was not found`);
+    }
+    return found;
   };
 }
