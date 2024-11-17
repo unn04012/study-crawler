@@ -8,11 +8,18 @@ export class StudyCrawlerInflearn implements IStudyCrawler {
 
   constructor() {
     this._domain = 'https://www.inflearn.com/';
-    this._studyUrl = 'https://www.inflearn.com/community/studies?s=%EC%8A%A4%ED%84%B0%EB%94%94&order=recent&status=unrecruited';
+    this._studyUrl = 'https://www.inflearn.com/community/studies?order=recent&status=unrecruited';
   }
 
-  public async getStudyList(): Promise<Study[]> {
-    const response = await axios.get(this._studyUrl);
+  public async getStudyList(search: string): Promise<Study[]> {
+    // URL 객체 생성
+    const url = new URL(this._studyUrl);
+
+    // 쿼리 파라미터 추가
+    url.searchParams.append('s', search);
+    // URL 출력
+    console.log(url.toString());
+    const response = await axios.get(url.toString());
     const $ = load(response.data);
 
     const studies: Study[] = [];
