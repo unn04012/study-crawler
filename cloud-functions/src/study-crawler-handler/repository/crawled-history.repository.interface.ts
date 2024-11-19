@@ -1,11 +1,12 @@
-import { Study } from '../crawler/study-crawler.interface';
+import { StudyEntity } from '../study.entity';
 
 export type CrawledHistory = {
+  hashTitle: string;
   title: string;
   content: string;
 };
 export interface ICrawledHistoryRepository {
-  getCrawledList(sendIds: string[]): Promise<CrawledHistory[]>;
+  getCrawledList(crawlIds: string[]): Promise<CrawledHistory[]>;
 
-  bulkInsert(history: Study[]): Promise<void>;
+  bulkInsert(history: StudyEntity[]): Promise<void>;
 }

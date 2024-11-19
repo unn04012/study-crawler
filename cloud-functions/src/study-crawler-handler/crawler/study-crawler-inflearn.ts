@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { load } from 'cheerio';
+import { StudyEntity } from '../study.entity';
 import { IStudyCrawler, Study } from './study-crawler.interface';
 
 export class StudyCrawlerInflearn implements IStudyCrawler {
@@ -11,7 +12,7 @@ export class StudyCrawlerInflearn implements IStudyCrawler {
     this._studyUrl = 'https://www.inflearn.com/community/studies?order=recent&status=unrecruited';
   }
 
-  public async getStudyList(search: string): Promise<Study[]> {
+  public async getStudyList(search: string): Promise<StudyEntity[]> {
     // URL 객체 생성
     const url = new URL(this._studyUrl);
 
@@ -36,6 +37,6 @@ export class StudyCrawlerInflearn implements IStudyCrawler {
       studies.push({ title, content, createdAt, link }); // Study 객체로 추가
     });
 
-    return studies;
+    return studies.map((e) => StudyEntity.fromCrawler(e));
   }
 }

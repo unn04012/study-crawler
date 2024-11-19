@@ -6,8 +6,8 @@ import { studyCrawlerFactory } from './crawler/study-crawler-factory';
 import { CrawledHistorySchema } from './schema/crawled-history.schema';
 import { CrawledHistoryRepositoryMySQL } from './repository/crawled-history.repository.mysql';
 import { initTypeormConnection } from '../infrastructure/typeorm-initialize';
-import { Study } from './crawler/study-crawler.interface';
 import { SlackReporterHTTP } from './slack.reporter.http';
+import { StudyEntity } from './study.entity';
 
 export async function studyCrawler(event: SQSEvent): Promise<APIGatewayProxyResult> {
   // 이벤트에서 SQS 메시지 추출
@@ -15,7 +15,6 @@ export async function studyCrawler(event: SQSEvent): Promise<APIGatewayProxyResu
   const ds = await initTypeormConnection(mysql);
   const crawledRepository = getRepository(ds);
   const slackReporter = new SlackReporterHTTP(slackWebhookUrl);
-  console.log('hello world');
   const crawlerFactory = studyCrawlerFactory();
   const crawler = crawlerFactory('INFLEARN');
 
@@ -30,24 +29,45 @@ export async function studyCrawler(event: SQSEvent): Promise<APIGatewayProxyResu
   const { keywords, search } = data;
 
   const studyList = await crawler.getStudyList(search);
+
+  const uniqueByCrawlIdFilter = (studyEntities: StudyEntity[]): StudyEntity[] => {
+    const seen = new Set<string>();
+    return studyEntities.filter((entity) => {
+      if (seen.has(entity.crawlId)) {
+        return false;
+      }
+      seen.add(entity.crawlId);
+      return true;
+    });
+  };
+
+  const removedDuplicatedStudyList = uniqueByCrawlIdFilter(studyList);
+
   // 이전에 크롤링하여 전송한 이력이 있는 것들은 제외합니다.
-  const crawledHistories = await crawledRepository.getCrawledList(studyList.map((e) => e.title));
-  const filteredStudyList = studyList.filter((e) => !crawledHistories.map((e) => e.title).includes(e.title));
-  console.log(crawledHistories);
-  const foundStudyListInKeyword: Study[] = [];
-  for (const keyword of keywords) {
-    const foundInTitle = filteredStudyList.find((e) => e.title.toLocaleLowerCase().trim().includes(keyword));
-    if (foundInTitle) {
-      foundStudyListInKeyword.push(foundInTitle);
-    } else {
-      const foundInContents = filteredStudyList.find((e) => e.content.toLocaleLowerCase().trim().includes(keyword));
-      if (foundInContents) foundStudyListInKeyword.push(foundInContents);
+  const crawledHistories = await crawledRepository.getCrawledList(removedDuplicatedStudyList.map((e) => e.crawlId));
+
+  const filteredStudyList = removedDuplicatedStudyList.filter((e) => !crawledHistories.map((e) => e.hashTitle).includes(e.crawlId));
+
+  const foundStudyListInKeyword: StudyEntity[] = [];
+  if (keywords.length) {
+    for (const keyword of keywords) {
+      const foundInTitle = filteredStudyList.find((e) => e.title.toLocaleLowerCase().trim().includes(keyword));
+      if (foundInTitle) {
+        foundStudyListInKeyword.push(foundInTitle);
+      } else {
+        const foundInContents = filteredStudyList.find((e) => e.content.toLocaleLowerCase().trim().includes(keyword));
+        if (foundInContents) foundStudyListInKeyword.push(foundInContents);
+      }
     }
+  } else {
+    foundStudyListInKeyword.push(...filteredStudyList);
   }
 
-  await crawledRepository.bulkInsert(foundStudyListInKeyword);
+  if (foundStudyListInKeyword) {
+    await crawledRepository.bulkInsert(foundStudyListInKeyword);
 
-  // await slackReporter.reportStudyList(foundStudyListInKeyword);
+    await slackReporter.reportStudyList(foundStudyListInKeyword);
+  }
 
   return {
     statusCode: 200,
