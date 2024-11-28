@@ -1,25 +1,31 @@
 {
-  "name": "study-crawler",
+  "name": "cloud-functions",
   "version": "1.0.0",
   "description": "study crawler server",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "test:study-crawler": "serverless invoke local --function studyCrawler --path ./src/lib/study-crawler-data.json"
   },
   "author": "unn04012",
   "license": "ISC",
   "devDependencies": {
     "@types/aws-lambda": "^8.10.145",
     "@types/node": "^22.9.0",
-    "serverless": "^4.4.7",
+    "serverless": "^3.39.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.3"
   },
   "dependencies": {
+    "@serverless/typescript": "^3.0.0",
     "axios": "^1.7.7",
     "cheerio": "^1.0.0",
     "dotenv": "^16.4.5",
     "mysql2": "^3.11.4",
+    "serverless-attach-managed-policy": "^0.0.7",
+    "serverless-offline": "^12.0.4",
+    "serverless-offline-ssm": "^6.2.0",
+    "serverless-plugin-typescript": "^2.1.5",
     "typeorm": "^0.3.20",
     "typeorm-naming-strategies": "^4.1.0"
   }

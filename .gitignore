@@ -1,0 +1,9 @@
+node_modules
+.env
+
+# Serverless directories
+.serverless
+.build
+.DS_Store
+.serverless
+dist

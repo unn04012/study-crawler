@@ -1,0 +1,24 @@
+service: studying
+plugins:
+  - serverless-plugin-typescript
+  - serverless-offline
+  - serverless-attach-managed-policy
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  stage: ${opt:stage, 'Dev'}
+  region: ${opt:region, 'ap-northeast-2'}
+  managedPolicyArns:
+    - 'arn:aws:iam::aws:policy/AmazonSQSFullAccess'
+
+functions:
+  studyCrawler:
+    handler: src/index.studyCrawler
+    environment:
+      SLACK_WEBHOOK_URL: ${ssm(ap-northeast-2):/STUDY_CRAWLER/SLACK_WEBHOOK_URL}
+      MYSQL_USER: ${ssm(ap-northeast-2):/STUDY_CRAWLER/DB_USER}
+      MYSQL_PORT: ${ssm(ap-northeast-2):/STUDY_CRAWLER/DB_PORT}
+      MYSQL_DATABASE: ${ssm(ap-northeast-2):/STUDY_CRAWLER/DB_NAME}
+      MYSQL_PASSWORD: ${ssm(ap-northeast-2):/STUDY_CRAWLER/DB_PASSWORD}

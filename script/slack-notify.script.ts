@@ -6,7 +6,7 @@ import { SlackReporterHTTP } from '../src/study-crawler-handler/slack.reporter.h
 import { StudyEntity } from '../src/study-crawler-handler/study.entity';
 (async () => {
   const event = {
-    Records: [{ body: JSON.stringify({ type: 'INFLEARN', keywords: [], search: '면접' }) }],
+    Records: [{ body: JSON.stringify({ type: 'INFLEARN', keywords: [], search: '역삼' }) }],
   };
 
   const slackUrl = process.env['SLACK_WEBHOOK_URL'];
