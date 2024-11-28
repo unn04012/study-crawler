@@ -4,6 +4,10 @@ on:
   push:
     branches: [deploy]
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -28,8 +32,9 @@ jobs:
       - name: Install NPM dependencies
         run: npm install
       - name: configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4
         with:
+          audience: sts.amazonaws.com
           role-to-assume: ${{ secrets.AWS_ROLE_NAME }}
           aws-region: ${{ secrets.AWS_REGION }}
       - name: serverless deploy
