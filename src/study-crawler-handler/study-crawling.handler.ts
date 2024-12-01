@@ -12,7 +12,7 @@ import { StudyEntity } from './study.entity';
 export async function studyCrawler(event: SQSEvent): Promise<APIGatewayProxyResult> {
   // 이벤트에서 SQS 메시지 추출
   const { slackWebhookUrl, mysql } = getEnv();
-  console.log(mysql);
+
   const ds = await initTypeormConnection(mysql);
   const crawledRepository = getRepository(ds);
   const slackReporter = new SlackReporterHTTP(slackWebhookUrl);
