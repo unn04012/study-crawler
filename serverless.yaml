@@ -16,6 +16,7 @@ provider:
 functions:
   studyCrawler:
     handler: src/index.studyCrawler
+    timeout: 30
     environment:
       SLACK_WEBHOOK_URL: ${ssm(ap-northeast-2):/STUDY_CRAWLER/SLACK_WEBHOOK_URL}
       MYSQL_USER: ${ssm(ap-northeast-2):/STUDY_CRAWLER/DB_USER}
