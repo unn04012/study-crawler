@@ -23,3 +23,6 @@ functions:
       MYSQL_DATABASE: ${ssm(ap-northeast-2):/STUDY_CRAWLER/DB_NAME}
       MYSQL_PASSWORD: ${ssm(ap-northeast-2):/STUDY_CRAWLER/DB_PASSWORD}
       MYSQL_HOST: ${ssm(ap-northeast-2):/STUDY_CRAWLER/DB_HOST}
+    events:
+      - sqs:
+          arn: ${ssm(ap-northeast-2):/STUDY_CRAWLER/SQS_ARN}
