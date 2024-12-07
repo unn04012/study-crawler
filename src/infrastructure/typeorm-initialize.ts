@@ -26,6 +26,9 @@ export async function initTypeormConnection(config: MysqlConfig): Promise<DataSo
     logging: false,
     synchronize: false,
     timezone: 'Z',
+    extra: {
+      connectionLimit: 1,
+    },
   });
 
   return await typeormDataSource.initialize();
